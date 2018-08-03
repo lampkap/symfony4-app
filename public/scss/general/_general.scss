@@ -6,6 +6,18 @@ html {
     font-size: 62.5%;
 } 
 
+body {
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.contents {
+    flex: 1;
+    padding: 4rem 8rem;
+    margin-right: 45%;
+}
+
 h1, h2, h3, h4, h5, h6 {
     color: $bodyColorDark;
     font-family: $titleFont;
@@ -13,9 +25,14 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 {
     font-size: 3.6rem; 
+    margin-bottom: 5rem;
 }
 
 a {
     color: $highlight2;
     font-weight: bold;
+}
+
+footer {
+    background-color: $highlight1;
 }
