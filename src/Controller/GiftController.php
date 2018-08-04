@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Form\MemberType;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
@@ -12,7 +13,11 @@ class GiftController extends Controller
      */
     public function index()
     {
-        return $this->render('index.html.twig');
+        $form = $this->createForm(MemberType::class);
+
+        return $this->render('index.html.twig', array(
+            'form' => $form->createView()
+        ));
     }
 
     /**
