@@ -6,6 +6,7 @@
 /vendor/
 /node_modules/
 /public/node_modules/
+*.DS_Store
 ###< symfony/framework-bundle ###
 
 ###> symfony/phpunit-bridge ###
