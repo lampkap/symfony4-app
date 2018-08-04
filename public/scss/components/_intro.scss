@@ -5,3 +5,11 @@
     line-height: 1.5;
     padding-bottom: 3rem;
 } 
+
+.intro__inline {
+    display: inline-block;
+    width: calc(100% - 11rem);
+    margin-left: 3rem;
+    vertical-align: middle;
+    padding-bottom: 0;
+}

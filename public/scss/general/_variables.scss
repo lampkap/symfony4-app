@@ -3,6 +3,7 @@ $bodyColorLight: #AEAEAE;
 $formInputs: #F8F8F8;
 $highlight1: #FCEA85;
 $highlight2: #ED544C;
+$success: #7ac142;
 
 $bodyFont: 'Roboto', sans-serif;
 $titleFont: 'Gilroy', sans-serif;
@@ -11,3 +12,4 @@ $max-width: 1340px;
 $mobile-gutter: 20px;
 $gutter: 40px;
 $neat-grid: ( columns: 12, gutter: $gutter );
+$curve: cubic-bezier(0.650, 0.000, 0.450, 1.000);
