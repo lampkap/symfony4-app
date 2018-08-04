@@ -14,4 +14,20 @@ class GiftController extends Controller
     {
         return $this->render('index.html.twig');
     }
+
+    /**
+     * @Route("/gift", name="gift")
+     */
+    public function gift()
+    {
+        return $this->render('gift.html.twig');
+    }
+
+    /**
+     * @Route("/thanks", name="thanks")
+     */
+    public function thanks()
+    {
+        return $this->render('thanks.html.twig');
+    }
 }

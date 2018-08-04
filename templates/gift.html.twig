@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block contents %}
+    <h1>Koninklijk Belgische Voetbalbond</h1>
+    <p class="intro">
+        Kies jouw geschenk.
+    </p>
+
+    <div class="gifts">
+        <div class="gift" data-id="1">
+            <span class="gift--name">Rode sjaal</span>
+            <img class="gift--image" src="{{ asset('img/sjaal_rood.jpg') }}" alt="Rode sjaal">
+        </div>
+        <div class="gift" data-id="2">
+            <span class="gift--name">Zwarte sjaal</span>
+            <img class="gift--image" src="{{ asset('img/sjaal_zwart.jpg') }}" alt="Rode sjaal">
+        </div>
+        <div class="gift" data-id="3">
+            <span class="gift--name">Pet</span>
+            <img class="gift--image" src="{{ asset('img/pet.jpg') }}" alt="Rode sjaal">
+        </div>
+        <div class="gift" data-id="4">
+            <span class="gift--name">Vlag</span>
+            <img class="gift--image" src="{{ asset('img/vlag.jpg') }}" alt="Rode sjaal">
+        </div>
+    </div>
+
+    <form action="/thanks">
+        <input type="hidden" value="" name="gift" id="gift-value">
+        <div class="form--field">
+            <input type="submit" class="form--submit" value="Volgende">
+        </div>
+    </form>
+{% endblock %}
