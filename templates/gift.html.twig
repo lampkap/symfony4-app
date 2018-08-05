@@ -6,29 +6,31 @@
         Kies jouw geschenk.
     </p>
 
+    {% if errors|length > 0 %}
+        <div class="messages messages--error">
+            <ul>
+                {% for error in errors %}
+                    <li class="error">{{ error.message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
     <div class="gifts">
-        <div class="gift" data-id="1">
-            <span class="gift--name">Rode sjaal</span>
-            <img class="gift--image" src="{{ asset('img/sjaal_rood.jpg') }}" alt="Rode sjaal">
-        </div>
-        <div class="gift" data-id="2">
-            <span class="gift--name">Zwarte sjaal</span>
-            <img class="gift--image" src="{{ asset('img/sjaal_zwart.jpg') }}" alt="Rode sjaal">
-        </div>
-        <div class="gift" data-id="3">
-            <span class="gift--name">Pet</span>
-            <img class="gift--image" src="{{ asset('img/pet.jpg') }}" alt="Rode sjaal">
-        </div>
-        <div class="gift" data-id="4">
-            <span class="gift--name">Vlag</span>
-            <img class="gift--image" src="{{ asset('img/vlag.jpg') }}" alt="Rode sjaal">
-        </div>
+        {% for gift in gifts %}
+            <div class="gift" data-id="{{ gift.id }}">
+                <span class="gift--name">{{ gift.gift }}</span>
+                <img class="gift--image" src="{{ asset('img/'~ gift.imageName) }}" alt="{{ gift.gift }}">
+            </div>
+        {% endfor %}
     </div>
 
-    <form action="/thanks">
-        <input type="hidden" value="" name="gift" id="gift-value">
+    {{ form_start(form) }}
+        {{ form_widget(form.birthdate) }}
+        {{ form_widget(form.number) }}
+        {{ form_widget(form.gift) }}
         <div class="form--field">
-            <input type="submit" class="form--submit" value="Volgende">
+            {{ form_widget(form.next) }}
         </div>
-    </form>
+    {{ form_end(form) }}
 {% endblock %}
