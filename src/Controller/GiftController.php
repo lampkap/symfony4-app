@@ -183,7 +183,7 @@ class GiftController extends Controller
         if(trim($data['birthdate']) === '') {
             $errors[] = array('message' => 'Gelieve jouw geboortedatum in te vullen');
         }
-        if(!$this->formatBirthdate($data['birthdate'])) {
+        if(!self::formatBirthdate($data['birthdate'])) {
             $errors[] = array('message' => 'Gelieve een geldig geboortedatum in te vullen');
         }
 
@@ -191,14 +191,14 @@ class GiftController extends Controller
     }
 
     // format date in the way symfony wants it
-    public function formatBirthdate($dateString)
+    public static function formatBirthdate($dateString)
     {
-        // if the datestring is gibberish, we can not format it
-        if(!DateTime::createFromFormat('d-m-Y', $dateString)) {
+        $dateString = str_replace('/', '-', $dateString);
+        $unix = strtotime($dateString);
+        if(!$unix) {
             return false;
         } else {
-            $dateString = str_replace('/', '-', $dateString);
-            $date = new \DateTime($dateString);
+            $date = new \DateTime(date('d-m-Y', $unix));
             return $date;
         }
     }
@@ -209,7 +209,7 @@ class GiftController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $number = $data['number'];
-        $birthdate = $this->formatBirthdate($data['birthdate']);
+        $birthdate = self::formatBirthdate($data['birthdate']);
 
         $member = $em->getRepository(Member::class)->findBy(
             array('number' => $number, 'birthdate' => $birthdate)
