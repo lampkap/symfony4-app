@@ -4,12 +4,14 @@
   font-family: $bodyFont;
   color: $bodyColorDark;
   border: 1px solid rgba(0,0,0,.1);
+  margin-bottom: 5rem;
 
   ul {
     padding-left: 2rem;
   }
   li {
     list-style: none;
+    line-height: 1.5;
   }
 }
 
