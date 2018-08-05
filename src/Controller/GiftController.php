@@ -88,6 +88,13 @@ class GiftController extends Controller
     {
         // get the date of the member stored in the session
         $data = $request->getSession()->get('member');
+
+        // if the user did not enter the previous form, we'll redirect him to the front and ask him to verify his membership
+        if($data === null) {
+            $this->setFlashMessage('Verifieer uw lidmaatschap', $request);
+            return new RedirectResponse('/');
+        }
+
         $em = $this->getDoctrine()->getManager();
         // get all gifts
         $gifts = $em->getRepository(Gift::class)->findAll();
@@ -102,11 +109,6 @@ class GiftController extends Controller
         $form->handleRequest($request);
 
         if($form->isSubmitted()) {
-            // if the user did not enter the previous form, we'll redirect him to the front and ask him to verify his membership
-            if($data === null) {
-                $this->setFlashMessage('Verifieer uw lidmaatschap', $request);
-                return new RedirectResponse('/');
-            }
             // check if the data has been tempered with
             $errors = $this->validateMember($data);
             // check to see if a gift has been selected
