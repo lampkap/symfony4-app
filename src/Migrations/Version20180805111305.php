@@ -16,6 +16,7 @@ final class Version20180805111305 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE gift ADD image_name VARCHAR(255) NOT NULL');
+        $this->addSql('INSERT INTO gift (gift, image_name) VALUES ("Rode sjaal", "sjaal_rood.jpg"), ("Zwarte sjaal", "sjaal_zwart.jpg"), ("Pet", "pet.jpg"), ("Vlag", "vlag.jpg")');
     }
 
     public function down(Schema $schema) : void
@@ -23,6 +24,7 @@ final class Version20180805111305 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
+        $this->addSql('DELETE FROM gift');
         $this->addSql('ALTER TABLE gift DROP image_name');
     }
 }
