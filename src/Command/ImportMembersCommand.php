@@ -66,6 +66,7 @@ class ImportMembersCommand extends ContainerAwareCommand
      */
     protected function importMembers($file, SymfonyStyle $io)
     {
+        $em = $this->getContainer()->get('doctrine')->getEntityManager();
         // reformat the values of the csv to an array
         $members = $this->parseCsv($file);
         if(!$members) {
@@ -76,6 +77,8 @@ class ImportMembersCommand extends ContainerAwareCommand
         $created = 0;
         $updated = 0;
         $skipped = 0;
+        $i = 0;
+        $max = count($members);
 
         // loop through all csv records
         foreach($members as $memberValues) {
@@ -86,7 +89,6 @@ class ImportMembersCommand extends ContainerAwareCommand
                 $io->error('De datum ' . $memberValues[0] . ' is niet correct. Het importeren is onderbroken');
                 exit;
             } else {
-                $em = $this->getContainer()->get('doctrine')->getEntityManager();
                 // check if a member exists with a specific member number
                 $member = $em->getRepository(Member::class)->findBy(array('number' => $memberValues[1]));
                 // if the member does not exist, we create one
@@ -94,7 +96,7 @@ class ImportMembersCommand extends ContainerAwareCommand
 
                     $this->createMember($date, $memberValues[1]);
 
-                    $io->writeln('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geïmporteerd');
+                    //$io->writeln('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geïmporteerd');
                     $created++;
                 // else we check if we need to update the member
                 } else {
@@ -102,15 +104,21 @@ class ImportMembersCommand extends ContainerAwareCommand
                     $hasUpdated = $this->updateMember($member, $date);
                     // if it has, he will be updated
                     if($hasUpdated) {
-                        $io->writeln('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geüpdate');
+                        //$io->writeln('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geüpdate');
                         $updated++;
                     // else he will be skipped
                     } else {
-                        $io->writeln('Lid ' . $memberValues[1] . ' is niet gewijzigd.');
+                        //$io->writeln('Lid ' . $memberValues[1] . ' is niet gewijzigd.');
                         $skipped++;
                     }
 
                 }
+            }
+
+            $i++;
+
+            if($i >= $max || $i % 500 === 0) {
+                $em->flush();
             }
         }
 
@@ -149,7 +157,6 @@ class ImportMembersCommand extends ContainerAwareCommand
         $member->setNumber($number);
 
         $em->persist($member);
-        $em->flush();
     }
 
     /**
@@ -166,7 +173,6 @@ class ImportMembersCommand extends ContainerAwareCommand
             $member->setBirthdate($date);
 
             $em->persist($member);
-            $em->flush();
 
             // return true to say the member could and has been updated
             return true;
