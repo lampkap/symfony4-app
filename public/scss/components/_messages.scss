@@ -1,0 +1,18 @@
+.messages {
+
+  font-size: 1.6rem;
+  font-family: $bodyFont;
+  color: $bodyColorDark;
+  border: 1px solid rgba(0,0,0,.1);
+
+  ul {
+    padding-left: 2rem;
+  }
+  li {
+    list-style: none;
+  }
+}
+
+.messages--error {
+  border-left: 3px solid $highlight2;
+}

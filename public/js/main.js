@@ -7,16 +7,22 @@ if(inputs) {
 
     inputs.forEach(input => {
 
+        stickyLabel(input);
+
         input.addEventListener('change', () => {
-    
-            if (input.value === '') 
-                input.nextElementSibling.classList.remove("sticky");
-            else 
-                input.nextElementSibling.classList.add("sticky");
+
+            stickyLabel(input);
     
         })
     })
 
+}
+
+function stickyLabel(input) {
+    if (input.value === '')
+        input.nextElementSibling.classList.remove("sticky");
+    else
+        input.nextElementSibling.classList.add("sticky");
 }
 
 /**
@@ -28,12 +34,13 @@ if(dateField) {
 
     // disable custom input in field
     dateField.addEventListener('keypress', e => {
-        e.preventDefault();
+        // e.preventDefault();
     }) 
 
     let picker = new Pikaday({ 
         field: dateField,
         format: 'DD-MM-YYYY',
+        //format: 'YYYY-MM-DD',
         yearRange: [1900, moment().year()],
         i18n: {
             previousMonth : 'Vorige maand',
@@ -50,7 +57,7 @@ if(dateField) {
  * Handle image select
  */
 let gifts = document.querySelectorAll('.gift'),
-    formField = document.getElementById('gift-value');
+    formField = document.getElementById('gift_gift');
 
 if(gifts) {
 
