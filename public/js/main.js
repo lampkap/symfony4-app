@@ -34,7 +34,7 @@ if(dateField) {
 
     // disable custom input in field
     dateField.addEventListener('keypress', e => {
-        // e.preventDefault();
+        e.preventDefault();
     }) 
 
     let picker = new Pikaday({ 
