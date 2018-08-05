@@ -21,6 +21,11 @@ class Gift
      */
     private $gift;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $imageName;
+
     public function getId()
     {
         return $this->id;
@@ -34,6 +39,18 @@ class Gift
     public function setGift(string $gift): self
     {
         $this->gift = $gift;
+
+        return $this;
+    }
+
+    public function getImageName(): ?string
+    {
+        return $this->imageName;
+    }
+
+    public function setImageName(string $imageName): self
+    {
+        $this->imageName = $imageName;
 
         return $this;
     }
