@@ -5,4 +5,21 @@
     background: url('../img/hazard.png') no-repeat;
     top: 0;
     right: -50%;
+
+    @media screen and (max-width: 1024px) {
+        display: none;
+    }
+
+    @media screen and (min-width: 1024px) {
+        right: -35%;
+        background-size: cover;
+    }
+
+    @media screen and (min-width: 1600px) {
+        right: -50%;
+    }
+
+    @media screen and (min-width: 1770px) {
+        background-size: contain;
+    }
 }

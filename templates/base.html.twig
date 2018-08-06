@@ -11,11 +11,13 @@
     <body>
         {% block body %}
             
-                <div class="background"></div>
-                <div class="contents">
-                    {% block contents %}{% endblock %}
+                <div class="wrapper">
+                    <div class="background"></div>
+                    <div class="contents">
+                        {% block contents %}{% endblock %}
+                    </div>
+                    {% include 'includes/footer.html.twig' %}
                 </div>
-                {% include 'includes/footer.html.twig' %}
 
         {% endblock %}
         {% block javascripts %}
