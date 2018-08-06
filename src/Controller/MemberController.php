@@ -13,10 +13,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 /**
- * Class GiftController
+ * Class MemberController
  * @package App\Controller
  */
-class GiftController extends Controller
+class MemberController extends Controller
 {
     /**
      * @Route("/", name="index")
@@ -179,7 +179,7 @@ class GiftController extends Controller
         if(trim($data['number']) === '') {
             $errors[] = array('message' => 'Gelieve jouw lidnummer in te vullen');
         }
-        if(!is_numeric($data['number'])) {
+        if(!is_numeric(trim($data['number']))) {
             $errors[] = array('message' => 'Het lidnummer mag enkel nummers bevatten');
         }
         if(trim($data['birthdate']) === '') {
@@ -195,7 +195,11 @@ class GiftController extends Controller
     // format date in the way symfony wants it
     public static function formatBirthdate($dateString)
     {
-        $dateString = str_replace('/', '-', $dateString);
+        if(trim($dateString) === '') {
+            return false;
+        }
+
+        $dateString = trim(str_replace('/', '-', $dateString));
         $unix = strtotime($dateString);
         if(!$unix) {
             return false;
