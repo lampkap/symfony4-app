@@ -41,7 +41,7 @@ class GenerateCsvCommand extends Command
         }
     }
 
-    protected function generateCsv($file, SymfonyStyle $io)
+    protected function generateCsv($file)
     {
         $records = array();
         for($i = 0; $i <= 1000; $i++) {
