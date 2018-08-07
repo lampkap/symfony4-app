@@ -41,15 +41,20 @@ class GenerateCsvCommand extends Command
         }
     }
 
-    protected function generateCsv($file, SymfonyStyle $io)
+    protected function generateCsv($file)
     {
+        $records = array();
         for($i = 0; $i <= 1000; $i++) {
             $number = $this->generateNumber();
             $date = $this->generateDate();
 
             $record = $date.';'.$number;
 
-            file_put_contents($file, $record . PHP_EOL, FILE_APPEND);
+            // Only add unique records to the csv file
+            if(!in_array($record, $records)) {
+                $records[] = $record;
+                file_put_contents($file, $record . PHP_EOL, FILE_APPEND);
+            }
         }
     }
 
@@ -58,7 +63,7 @@ class GenerateCsvCommand extends Command
     {
         $numbers = range(1000, 30000);
         $i = rand(0, count($numbers) - 1);
-
+        
         return $numbers[$i];
     }
 
