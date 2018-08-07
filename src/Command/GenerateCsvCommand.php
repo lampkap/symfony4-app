@@ -32,7 +32,7 @@ class GenerateCsvCommand extends Command
             // check if file is op type csv
             if($info['extension'] === 'csv') {
                 // everything checks out so let's import
-                $this->generateCsv($file, $io);
+                $this->generateCsv($file);
             } else {
                 $io->error('Het bestand moet van het type CSV zijn');
             }
