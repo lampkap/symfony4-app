@@ -217,11 +217,11 @@ class MemberController extends Controller
         $number = $data['number'];
         $birthdate = self::formatBirthdate($data['birthdate']);
 
-        $member = $em->getRepository(Member::class)->findBy(
+        $member = $em->getRepository(Member::class)->findOneBy(
             array('number' => $number, 'birthdate' => $birthdate)
         );
 
-        return (!empty($member)) ? reset($member) : false;
+        return (!empty($member)) ? $member : false;
     }
 
     // store number and date in session
