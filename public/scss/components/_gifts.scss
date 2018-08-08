@@ -1,6 +1,10 @@
+.gifts {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 .gift {
-    display: inline-block; 
-    margin-right: 5rem;
+    margin: 0 5rem 5rem 0;
 
     &:last-child {
         margin-right: 0;

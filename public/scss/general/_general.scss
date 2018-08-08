@@ -29,6 +29,7 @@ body {
 
     @media screen and (max-width: 1024px) {
         margin-right: 0;
+        padding: 4rem;
     }
 }
 
@@ -50,4 +51,8 @@ a {
 footer {
     background-color: $highlight1;
     padding: 0 8rem;
+
+    @media screen and (max-width: 1024px) {
+        padding: 0 4rem;
+    }
 }
