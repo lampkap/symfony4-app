@@ -29,8 +29,35 @@ class GenerateCsvCommand extends Command
             $info = pathinfo($file);
             // check if file is op type csv
             if($info['extension'] === 'csv') {
-                // everything checks out so let's import
-                $this->generateCsv($file, $io);
+                // everything checks out so let's generate
+
+                // check if file exists. If so, give the choice to delete and create a new one or to append to it
+                if(file_exists($file)) {
+                    $handleFile = $io->choice(
+                        'Het bestand ' . $file . ' bestaat al. Wilt u deze opnieuw laten genereren of het bestand uitbreiden?',
+                        array('Opnieuw laten genereren', 'bijvoegen'));
+
+                    if($handleFile === 'Opnieuw laten genereren') {
+                        unlink($file);
+                    }
+                } else {
+                    $handleFile = 'create';
+                }
+
+                // generate the csv
+                $this->generateCsv($file, $handleFile);
+
+                // return success or error messages
+                if(file_exists($file)) {
+                    if($handleFile === 'create' || $handleFile === 'Opnieuw laten genereren') {
+                        $io->success('Er werden 1000 leden gegenereerd en toegevoegd aan het bestand ' . $file);
+                    } else {
+                        $io->success('Er werden 1000 extra leden gegenereerd en toegevoegd aan het bestand ' . $file);
+                    }
+                } else {
+                    $io->error('Het bestand ' . $file . ' kon niet worden aangemaakt');
+                }
+
             } else {
                 $io->error('Het bestand moet van het type CSV zijn');
             }
@@ -39,21 +66,8 @@ class GenerateCsvCommand extends Command
         }
     }
 
-    protected function generateCsv($file, SymfonyStyle $io)
+    protected function generateCsv($file, $handleFile)
     {
-        // if the file already exists, we can delete it and create a new one or append on it.
-        if(file_exists($file)) {
-            $handleFile = $io->choice(
-                'Het bestand ' . $file . ' bestaat al. Wilt u deze opnieuw laten genereren of het bestand uitbreiden?',
-                array('Opnieuw laten genereren', 'bijvoegen'));
-
-            if($handleFile === 'Opnieuw laten genereren') {
-                unlink($file);
-            }
-        } else {
-            $handleFile = 'create';
-        }
-
         // check if the directories of the path exist, thet should be created if they don't exist
         $directories = dirname($file);
 
@@ -77,15 +91,7 @@ class GenerateCsvCommand extends Command
             }
         }
 
-        if(file_exists($file)) {
-            if($handleFile === 'create' || $handleFile === 'Opnieuw laten genereren') {
-                $io->success('Er werden 1000 leden gegenereerd en toegevoegd aan het bestand ' . $file);
-            } else {
-                $io->success('Er werden 1000 extra leden gegenereerd en toegevoegd aan het bestand ' . $file);
-            }
-        } else {
-            $io->error('Het bestand ' . $file . ' kon niet worden aangemaakt');
-        }
+
     }
 
 
