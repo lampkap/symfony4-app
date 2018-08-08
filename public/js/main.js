@@ -40,7 +40,6 @@ if(dateField) {
     let picker = new Pikaday({ 
         field: dateField,
         format: 'DD-MM-YYYY',
-        //format: 'YYYY-MM-DD',
         yearRange: [1900, moment().year()],
         i18n: {
             previousMonth : 'Vorige maand',
