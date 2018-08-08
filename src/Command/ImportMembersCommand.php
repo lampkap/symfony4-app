@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Controller\GiftController;
+use App\Controller\MemberController;
 use App\Entity\Member;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -82,7 +83,7 @@ class ImportMembersCommand extends ContainerAwareCommand
         // loop through all csv records
         foreach($members as $memberValues) {
             // check if the date is configurable
-            $date = GiftController::formatBirthdate($memberValues[0]);
+            $date = MemberController::formatBirthdate($memberValues[0]);
             if(!$date) {
                 // if not, we stop the import
                 $io->error('De datum ' . $memberValues[0] . ' is niet correct. Het importeren is onderbroken');
