@@ -4,15 +4,23 @@ namespace App\Command;
 
 use App\Controller\GiftController;
 use App\Entity\Member;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class ImportMembersCommand extends ContainerAwareCommand
 {
+    protected $logger;
+
+    public function __construct(?string $name = null, LoggerInterface $logger)
+    {
+        parent::__construct($name);
+        $this->logger = $logger;
+    }
+
     /**
      * @var string
      */
@@ -21,10 +29,8 @@ class ImportMembersCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setDescription('Add a short description for your command')
-            ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
-            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
-        ;
+            ->setDescription('Importeer leden vanuit een CSV bestand')
+            ->addArgument('file', InputArgument::OPTIONAL, 'Het CSV bestand met daarin de gegevens van de leden');
     }
 
     /**
@@ -35,7 +41,7 @@ class ImportMembersCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
-        $file = $input->getArgument('arg1');
+        $file = $input->getArgument('file');
 
         if ($file) {
             // check if file exists
@@ -53,10 +59,6 @@ class ImportMembersCommand extends ContainerAwareCommand
             }
         } else {
             $io->error('Geef een bestandspad mee als argument');
-        }
-
-        if ($input->getOption('option1')) {
-            // ...
         }
     }
 
@@ -86,27 +88,27 @@ class ImportMembersCommand extends ContainerAwareCommand
                 $io->error('De datum ' . $memberValues[0] . ' is niet correct. Het importeren is onderbroken');
                 exit;
             } else {
-                $em = $this->getContainer()->get('doctrine')->getEntityManager();
+                $em = $this->getContainer()->get('doctrine')->getManager();
                 // check if a member exists with a specific member number
                 $member = $em->getRepository(Member::class)->findBy(array('number' => $memberValues[1]));
                 // if the member does not exist, we create one
                 if(empty($member)) {
 
                     $this->createMember($date, $memberValues[1]);
-
-                    $io->writeln('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geïmporteerd');
+                    $this->logger->info('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geïmporteerd');
                     $created++;
+
                 // else we check if we need to update the member
                 } else {
                     // check if the birthdate has changed of a member
                     $hasUpdated = $this->updateMember($member, $date);
                     // if it has, he will be updated
                     if($hasUpdated) {
-                        $io->writeln('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geüpdate');
+                        $this->logger->info('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geüpdate');
                         $updated++;
                     // else he will be skipped
                     } else {
-                        $io->writeln('Lid ' . $memberValues[1] . ' is niet gewijzigd.');
+                        $this->logger->info('Lid ' . $memberValues[1] . ' is niet gewijzigd.');
                         $skipped++;
                     }
 
@@ -142,7 +144,7 @@ class ImportMembersCommand extends ContainerAwareCommand
      */
     protected function createMember($date, $number)
     {
-        $em = $this->getContainer()->get('doctrine')->getEntityManager();
+        $em = $this->getContainer()->get('doctrine')->getManager();
         $member = new Member();
 
         $member->setBirthdate($date);
@@ -159,7 +161,7 @@ class ImportMembersCommand extends ContainerAwareCommand
      */
     protected function updateMember($member, $date)
     {
-        $em = $this->getContainer()->get('doctrine')->getEntityManager();
+        $em = $this->getContainer()->get('doctrine')->getManager();
         $member = reset($member);
 
         if($member->getBirthdate() != $date) {
