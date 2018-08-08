@@ -27,11 +27,9 @@ class GenerateCsvCommand extends Command
 
         if ($file) {
             $info = pathinfo($file);
-            // check if file is op type csv
-            if($info['extension'] === 'csv') {
-                // everything checks out so let's generate
 
-                // check if file exists. If so, give the choice to delete and create a new one or to append to it
+            if($info['extension'] === 'csv') {
+
                 if(file_exists($file)) {
                     $handleFile = $io->choice(
                         'Het bestand ' . $file . ' bestaat al. Wilt u deze opnieuw laten genereren of het bestand uitbreiden?',
@@ -44,10 +42,8 @@ class GenerateCsvCommand extends Command
                     $handleFile = 'create';
                 }
 
-                // generate the csv
                 $this->generateCsv($file, $handleFile);
 
-                // return success or error messages
                 if(file_exists($file)) {
                     if($handleFile === 'create' || $handleFile === 'Opnieuw laten genereren') {
                         $io->success('Er werden 1000 leden gegenereerd en toegevoegd aan het bestand ' . $file);
@@ -68,7 +64,7 @@ class GenerateCsvCommand extends Command
 
     protected function generateCsv($file, $handleFile)
     {
-        // check if the directories of the path exist, thet should be created if they don't exist
+        // create the directories of the path if they don't exist
         $directories = dirname($file);
 
         if(!is_dir($directories)) {

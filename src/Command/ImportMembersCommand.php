@@ -31,7 +31,7 @@ class ImportMembersCommand extends ContainerAwareCommand
     {
         $this
             ->setDescription('Importeer leden vanuit een CSV bestand')
-            ->addArgument('file', InputArgument::OPTIONAL, 'Het CSV bestand met daarin de gegevens van de leden');
+            ->addArgument('file', InputArgument::REQUIRED, 'Het CSV bestand met daarin de gegevens van de leden');
     }
 
     /**
@@ -45,12 +45,12 @@ class ImportMembersCommand extends ContainerAwareCommand
         $file = $input->getArgument('file');
 
         if ($file) {
-            // check if file exists
+
             if(file_exists($file)) {
                 $info = pathinfo($file);
-                // check if file is op type csv
+
                 if($info['extension'] === 'csv') {
-                    // everything checks out so let's import
+
                     $this->importMembers($file, $io);
                 } else {
                     $io->error('Het bestand moet van het type CSV zijn');
@@ -69,45 +69,41 @@ class ImportMembersCommand extends ContainerAwareCommand
      */
     protected function importMembers($file, SymfonyStyle $io)
     {
-        // reformat the values of the csv to an array
+        // create an array from the csv values
         $members = $this->parseCsv($file);
         if(!$members) {
             $io->error('Het csv bestand kon niet worden verwerkt of heeft geen inhoud');
             exit;
         }
-        // set import status values
+
         $created = 0;
         $updated = 0;
         $skipped = 0;
 
-        // loop through all csv records
         foreach($members as $memberValues) {
-            // check if the date is configurable
+            // check if the date is correct and can be imported
             $date = MemberController::formatBirthdate($memberValues[0]);
             if(!$date) {
-                // if not, we stop the import
                 $io->error('De datum ' . $memberValues[0] . ' is niet correct. Het importeren is onderbroken');
                 exit;
             } else {
                 $em = $this->getContainer()->get('doctrine')->getManager();
-                // check if a member exists with a specific member number
-                $member = $em->getRepository(Member::class)->findBy(array('number' => $memberValues[1]));
-                // if the member does not exist, we create one
+
+                $member = $em->getRepository(Member::class)->findOneBy(array('number' => $memberValues[1]));
+
                 if(empty($member)) {
 
                     $this->createMember($date, $memberValues[1]);
                     $this->logger->info('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geïmporteerd');
                     $created++;
 
-                // else we check if we need to update the member
                 } else {
-                    // check if the birthdate has changed of a member
+                    // check if the member should be updated. If so, the member will be updated and function will return true
                     $hasUpdated = $this->updateMember($member, $date);
-                    // if it has, he will be updated
+
                     if($hasUpdated) {
                         $this->logger->info('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geüpdate');
                         $updated++;
-                    // else he will be skipped
                     } else {
                         $this->logger->info('Lid ' . $memberValues[1] . ' is niet gewijzigd.');
                         $skipped++;
@@ -117,7 +113,7 @@ class ImportMembersCommand extends ContainerAwareCommand
             }
         }
 
-        $io->success('Import doorgevoerd!');
+        $io->success('Import doorgevoerd');
         $io->table(array('Aangemaakt', 'Aangepast', 'Overgeslagen'), array(array($created, $updated, $skipped)));
 
     }
@@ -171,11 +167,9 @@ class ImportMembersCommand extends ContainerAwareCommand
             $em->persist($member);
             $em->flush();
 
-            // return true to say the member could and has been updated
             return true;
 
         } else {
-            // return false to say the member is not updated since the values did not change
             return false;
         }
     }
