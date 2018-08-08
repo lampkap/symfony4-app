@@ -15,8 +15,8 @@ class GenerateCsvCommand extends Command
     protected function configure()
     {
         $this
-            ->setDescription('Generate a CSV file to use for the import')
-            ->addArgument('path', InputArgument::REQUIRED, 'The path of the file that should be created')
+            ->setDescription('Genereer een CSV bestand voor het importeren van leden')
+            ->addArgument('path', InputArgument::REQUIRED, 'Het pad waar het bestand moet aangemaakt of aangepast worden')
         ;
     }
 
