@@ -32,44 +32,42 @@ class MemberController extends Controller
         // get the submitted data
         $data = $request->request->get('member');
 
-        if($form->isSubmitted()) {
-            // validate the member (birthdate and membership number)
-            $errors = $this->validateMember($data);
-        } else {
-            $errors = array();
+        $errors = array();
 
-            // if there are flash messages, return them as error messages
-            if($session->get('flash') !== null) {
-                $errors[] = $session->get('flash');
-                $session->remove('flash');
-            }
+        // if there are flash messages, return them as error messages
+        if($session->get('flash') !== null) {
+            $errors[] = $session->get('flash');
+            $session->remove('flash');
         }
 
         // if everything went alright
-        if($form->isSubmitted() && $form->isValid()) {
+        if($form->isSubmitted()) {
 
-            // check to see if there's a member with the entered data
-            $member = $this->getMember($data);
-            // if not, throw an error
-            if(!$member) {
+            $errors = $this->validateMember($data);
 
-                $errors[] = array('message' => 'Er werd geen lid teruggevonden met ingevulde gegevens');
+            if($form->isValid()) {
+                // check to see if there's a member with the entered data
+                $member = $this->getMember($data);
+                // if not, throw an error
+                if(!$member) {
 
-            } else {
-                // if there is but has already chosen a gift, throw an error
-                if($member->getGift() !== null) {
-
-                    $errors[] = array('message' => 'U heeft reeds een geschenk gekozen');
+                    $errors[] = array('message' => 'Er werd geen lid teruggevonden met ingevulde gegevens');
 
                 } else {
-                    // else store the values in the session and redirect to the gift selection page
-                    $this->storeDataInSession($request);
-                    // redirect to gift page
-                    return new RedirectResponse('/gift');
+                    // if there is but has already chosen a gift, throw an error
+                    if($member->getGift() !== null) {
+
+                        $errors[] = array('message' => 'U heeft reeds een geschenk gekozen');
+
+                    } else {
+                        // else store the values in the session and redirect to the gift selection page
+                        $this->storeDataInSession($request);
+                        // redirect to gift page
+                        return new RedirectResponse('/gift');
+                    }
+
                 }
-
             }
-
         }
 
         return $this->render('index.html.twig', array(
@@ -107,7 +105,10 @@ class MemberController extends Controller
 
         $form->handleRequest($request);
 
+        $errors = array();
+
         if($form->isSubmitted()) {
+
             // check if the data has been tempered with
             $errors = $this->validateMember($data);
             // check to see if a gift has been selected
@@ -115,37 +116,32 @@ class MemberController extends Controller
                 $errors[] = array('message' => 'Gelieve een geschenk aan te duiden');
             }
 
-        } else {
-            $errors = array();
-        }
-
-        if($form->isSubmitted() && $form->isValid()) {
-
-            // check if the member exists
-            $member = $this->getMember($data);
-            // if not, set an error message and redirect to the index
-            if(!$member) {
-                $this->setFlashMessage('Er werd geen lid teruggevonden. Probeer het opnieuw', $request);
-                return new RedirectResponse('/');
-            } else {
-                // member exists but has already chosen a gift, redirect to homepage with error message
-                if($member->getGift() !== null) {
-                    $this->setFlashMessage('U heeft reeds een geschenk gekozen', $request);
+            if($form->isValid()) {
+                // check if the member exists
+                $member = $this->getMember($data);
+                // if not, set an error message and redirect to the index
+                if(!$member) {
+                    $this->setFlashMessage('Er werd geen lid teruggevonden. Probeer het opnieuw', $request);
                     return new RedirectResponse('/');
                 } else {
-                    $gift = $em->getRepository(Gift::class)->find($values['gift']);
-                    if($gift !== null) {
-                        $this->addGiftToMember($member, $gift);
-                        return new RedirectResponse('/thanks');
+                    // member exists but has already chosen a gift, redirect to homepage with error message
+                    if($member->getGift() !== null) {
+                        $this->setFlashMessage('U heeft reeds een geschenk gekozen', $request);
+                        return new RedirectResponse('/');
                     } else {
-                        // If no gift could be found for a certain id but the id exists, throw an error
-                        if(!empty($values['gift'])) {
-                            $errors[] = array('message' => 'Er ging iets mis met het ophalen van het geschenk');
+                        $gift = $em->getRepository(Gift::class)->find($values['gift']);
+                        if($gift !== null) {
+                            $this->addGiftToMember($member, $gift);
+                            return new RedirectResponse('/thanks');
+                        } else {
+                            // If no gift could be found for a certain id but the id exists, throw an error
+                            if(!empty($values['gift'])) {
+                                $errors[] = array('message' => 'Er ging iets mis met het ophalen van het geschenk');
+                            }
                         }
                     }
                 }
             }
-
         }
 
         return $this->render('gift.html.twig', array(
