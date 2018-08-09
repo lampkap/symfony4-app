@@ -42,7 +42,7 @@ class GenerateCsvCommand extends Command
                     $handleFile = 'create';
                 }
 
-                $this->generateCsv($file, $handleFile);
+                $this->generateCsv($file);
 
                 if(file_exists($file)) {
                     if($handleFile === 'create' || $handleFile === 'Opnieuw laten genereren') {
@@ -62,7 +62,7 @@ class GenerateCsvCommand extends Command
         }
     }
 
-    protected function generateCsv($file, $handleFile)
+    protected function generateCsv($file)
     {
         // create the directories of the path if they don't exist
         $directories = dirname($file);
