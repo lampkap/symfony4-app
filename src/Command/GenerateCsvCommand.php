@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Service\HelperService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -10,6 +11,14 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class GenerateCsvCommand extends Command
 {
+    private $helperService;
+
+    public function __construct(?string $name = null, HelperService $helperService)
+    {
+        parent::__construct($name);
+        $this->helperService = $helperService;
+    }
+
     protected static $defaultName = 'generate:csv';
 
     protected function configure()
@@ -71,44 +80,21 @@ class GenerateCsvCommand extends Command
             mkdir($directories, 0777, true);
         }
 
-        $records = array();
+        $numbers = array();
+        $i = 0;
 
-        for($i = 0; $i < 1000; $i++) {
-            $number = $this->generateNumber();
-            $date = $this->generateDate();
+        while($i < 1000) {
+            $number = $this->helperService->generateNumber();
+            $date = $this->helperService->generateDate();
 
             $record = $date.';'.$number;
 
             // Only add unique records to the csv file
-            if(!in_array($record, $records)) {
-                $records[] = $record;
-
+            if(!in_array($number, $numbers)) {
+                $numbers[] = $number;
                 file_put_contents($file, $record . PHP_EOL, FILE_APPEND);
+                $i++;
             }
         }
-
-
-    }
-
-
-    protected function generateNumber()
-    {
-        $numbers = range(1000, 30000);
-        $i = rand(0, count($numbers) - 1);
-        
-        return $numbers[$i];
-    }
-
-    protected function generateDate()
-    {
-        $days = range(1, 28);
-        $months = range(1, 12);
-        $years = range(1930, 2000);
-
-        $daysI = rand(0, count($days) - 1);
-        $monthsI = rand(0, count($months) - 1);
-        $yearsI = rand(0, count($years) - 1);
-
-        return $days[$daysI] . '/' . $months[$monthsI] . '/' . $years[$yearsI];
     }
 }

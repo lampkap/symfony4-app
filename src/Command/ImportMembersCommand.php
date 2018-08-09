@@ -5,6 +5,8 @@ namespace App\Command;
 use App\Controller\GiftController;
 use App\Controller\MemberController;
 use App\Entity\Member;
+use App\Service\HelperService;
+use App\Service\MemberService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -14,12 +16,16 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class ImportMembersCommand extends ContainerAwareCommand
 {
-    protected $logger;
+    private $logger;
+    private $memberService;
+    private $helperService;
 
-    public function __construct(?string $name = null, LoggerInterface $logger)
+    public function __construct(?string $name = null, LoggerInterface $logger, MemberService $memberService, HelperService $helperService)
     {
         parent::__construct($name);
         $this->logger = $logger;
+        $this->memberService = $memberService;
+        $this->helperService = $helperService;
     }
 
     /**
@@ -70,7 +76,7 @@ class ImportMembersCommand extends ContainerAwareCommand
     protected function importMembers($file, SymfonyStyle $io)
     {
         // create an array from the csv values
-        $members = $this->parseCsv($file);
+        $members = $this->helperService->parseCsv($file);
         if(!$members) {
             $io->error('Het csv bestand kon niet worden verwerkt of heeft geen inhoud');
             exit;
@@ -82,7 +88,7 @@ class ImportMembersCommand extends ContainerAwareCommand
 
         foreach($members as $memberValues) {
             // check if the date is correct and can be imported
-            $date = MemberController::formatBirthdate($memberValues[0]);
+            $date = $this->helperService->formatBirthdate($memberValues[0]);
             if(!$date) {
                 $io->error('De datum ' . $memberValues[0] . ' is niet correct. Het importeren is onderbroken');
                 exit;
@@ -93,13 +99,13 @@ class ImportMembersCommand extends ContainerAwareCommand
 
                 if(empty($member)) {
 
-                    $this->createMember($date, $memberValues[1]);
+                    $this->memberService->createMember($date, $memberValues[1]);
                     $this->logger->info('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geïmporteerd');
                     $created++;
 
                 } else {
                     // check if the member should be updated. If so, the member will be updated and function will return true
-                    $hasUpdated = $this->updateMember($member, $date);
+                    $hasUpdated = $this->memberService->updateMember($member, $date);
 
                     if($hasUpdated) {
                         $this->logger->info('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geüpdate');
@@ -116,60 +122,5 @@ class ImportMembersCommand extends ContainerAwareCommand
         $io->success('Import doorgevoerd');
         $io->table(array('Aangemaakt', 'Aangepast', 'Overgeslagen'), array(array($created, $updated, $skipped)));
 
-    }
-
-    /**
-     * @param $file
-     * @return array|bool
-     */
-    protected function parseCsv($file)
-    {
-        $data = array();
-        if (($handle = fopen($file, 'r')) !== FALSE) {
-            while (($row = fgetcsv($handle, 0, ';')) !== FALSE) {
-                $data[] = $row;
-            }
-            fclose($handle);
-        }
-
-        return (empty($data)) ? false : $data;
-    }
-
-    /**
-     * @param $date
-     * @param $number
-     */
-    protected function createMember($date, $number)
-    {
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $member = new Member();
-
-        $member->setBirthdate($date);
-        $member->setNumber($number);
-
-        $em->persist($member);
-        $em->flush();
-    }
-
-    /**
-     * @param $member
-     * @param $date
-     * @return bool
-     */
-    protected function updateMember(Member $member, $date)
-    {
-        $em = $this->getContainer()->get('doctrine')->getManager();
-
-        if($member->getBirthdate() != $date) {
-            $member->setBirthdate($date);
-
-            $em->persist($member);
-            $em->flush();
-
-            return true;
-
-        } else {
-            return false;
-        }
     }
 }
