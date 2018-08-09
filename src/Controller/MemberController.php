@@ -3,9 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Gift;
-use App\Entity\Member;
 use App\Form\GiftType;
 use App\Form\MemberType;
+use App\Service\HelperService;
+use App\Service\MemberService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -20,9 +21,10 @@ class MemberController extends Controller
     /**
      * @Route("/", name="index")
      * @param Request $request
+     * @param MemberService $memberService
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function index(Request $request)
+    public function index(Request $request, MemberService $memberService)
     {
         $form = $this->createForm(MemberType::class);
         $form->handleRequest($request);
@@ -39,11 +41,11 @@ class MemberController extends Controller
 
         if($form->isSubmitted()) {
 
-            $errors = $this->validateMember($data);
+            $errors = $memberService->validateMember($data);
 
             if($form->isValid()) {
 
-                $member = $this->getMember($data);
+                $member = $memberService->getMember($data);
 
                 if(!$member) {
 
@@ -56,7 +58,7 @@ class MemberController extends Controller
 
                     } else {
                         // store the values in the session so we check if the user didn't go directly to "/gift"
-                        $this->storeDataInSession($request);
+                        $memberService->storeDataInSession($request);
                         return new RedirectResponse('/gift');
                     }
 
@@ -73,16 +75,18 @@ class MemberController extends Controller
     /**
      * @Route("/gift", name="gift")
      * @param Request $request
+     * @param MemberService $memberService
+     * @param HelperService $helperService
      * @return RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function gift(Request $request)
+    public function gift(Request $request, MemberService $memberService, HelperService $helperService)
     {
         // get the data of the index form which is stored in the session
         $data = $request->getSession()->get('member');
 
         // if the user did not enter the previous form, we'll redirect him to the front and ask him to verify his membership
         if($data === null) {
-            $this->setFlashMessage('Verifieer uw lidmaatschap', $request);
+            $helperService->setFlashMessage('Verifieer uw lidmaatschap', $request);
             return new RedirectResponse('/');
         }
 
@@ -103,29 +107,29 @@ class MemberController extends Controller
         if($form->isSubmitted()) {
 
             // check if the data has been tempered with
-            $errors = $this->validateMember($data);
+            $errors = $memberService->validateMember($data);
             if(!isset($values['gift']) || empty($values['gift'])) {
                 $errors[] = array('message' => 'Gelieve een geschenk aan te duiden');
             }
 
             if($form->isValid()) {
 
-                $member = $this->getMember($data);
+                $member = $memberService->getMember($data);
 
                 if(!$member) {
-                    $this->setFlashMessage('Er werd geen lid teruggevonden. Probeer het opnieuw', $request);
+                    $helperService->setFlashMessage('Er werd geen lid teruggevonden. Probeer het opnieuw', $request);
                     return new RedirectResponse('/');
                 }
 
                 if($member->getGift() !== null) {
-                    $this->setFlashMessage('U heeft reeds een geschenk gekozen', $request);
+                    $helperService->setFlashMessage('U heeft reeds een geschenk gekozen', $request);
                     return new RedirectResponse('/');
                 }
 
                 $gift = $em->getRepository(Gift::class)->find($values['gift']);
 
                 if($gift !== null) {
-                    $this->addGiftToMember($member, $gift);
+                    $memberService->addGiftToMember($member, $gift);
                     return new RedirectResponse('/thanks');
                 } else {
                     if(!empty($values['gift'])) {
@@ -156,81 +160,5 @@ class MemberController extends Controller
 
         $request->getSession()->remove('member');
         return $this->render('thanks.html.twig');
-    }
-
-    // basic validation on user input
-    public function validateMember($data)
-    {
-        $errors = array();
-
-        if(trim($data['number']) === '') {
-            $errors[] = array('message' => 'Gelieve jouw lidnummer in te vullen');
-        }
-        if(!is_numeric(trim($data['number']))) {
-            $errors[] = array('message' => 'Het lidnummer mag enkel nummers bevatten');
-        }
-        if(trim($data['birthdate']) === '') {
-            $errors[] = array('message' => 'Gelieve jouw geboortedatum in te vullen');
-        }
-        if(!self::formatBirthdate($data['birthdate'])) {
-            $errors[] = array('message' => 'Gelieve een geldig geboortedatum in te vullen');
-        }
-
-        return $errors;
-    }
-
-    // format the date to a DateTime object if possible. Return false instead
-    public static function formatBirthdate($dateString)
-    {
-        if(trim($dateString) === '') {
-            return false;
-        }
-
-        // change the date dividers so that strtotime function won't use the american date notation
-        $dateString = trim(str_replace('/', '-', $dateString));
-        $unix = strtotime($dateString);
-
-        if(!$unix) {
-            return false;
-        }
-
-        $date = new \DateTime(date('d-m-Y', $unix));
-        return $date;
-    }
-
-    public function getMember($data)
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $number = $data['number'];
-        $birthdate = self::formatBirthdate($data['birthdate']);
-
-        $member = $em->getRepository(Member::class)->findOneBy(
-            array('number' => $number, 'birthdate' => $birthdate)
-        );
-
-        return (!empty($member)) ? $member : false;
-    }
-
-    // store number and date in session
-    public function storeDataInSession(Request $request)
-    {
-        $session = $request->getSession();
-        $data = $request->request->get('member');
-        $session->set('member', $data);
-    }
-
-    public function setFlashMessage($message, Request $request)
-    {
-        $flashError = array('message' => $message);
-        $request->getSession()->set('flash', $flashError);
-    }
-
-    public function addGiftToMember(Member $member, Gift $gift)
-    {
-        $em = $this->getDoctrine()->getManager();
-        $member->setGift($gift);
-        $em->persist($member);
-        $em->flush();
     }
 }
