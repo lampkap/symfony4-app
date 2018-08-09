@@ -2,15 +2,26 @@
 
 namespace App\Tests\Controller;
 
-use App\Controller\MemberController;
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class MemberControllerTest extends TestCase
+class MemberControllerTest extends WebTestCase
 {
+    private $memberService;
+    private $helperService;
+
+    protected function setUp()
+    {
+        self::bootKernel();
+        $container = self::$kernel->getContainer();
+
+        $this->memberService = self::$container->get('App\Service\MemberService');
+        $this->helperService = self::$container->get('App\Service\HelperService');
+    }
+
     public function testIfDateStringCanBeFormattedToDate()
     {
         $dateString = '17-05-1993 ';
-        $result = MemberController::formatBirthdate($dateString);
+        $result = $this->helperService->formatBirthdate($dateString);
 
         $this->assertEquals(trim($dateString), $result->format('d-m-Y'));
     }
@@ -18,25 +29,23 @@ class MemberControllerTest extends TestCase
     public function testIfDateStringCanNotBeFormattedToDate()
     {
         $dateString = ' ';
-        $result = MemberController::formatBirthdate($dateString);
+        $result = $this->helperService->formatBirthdate($dateString);
 
         $this->assertFalse($result);
     }
 
     public function testIfMemberIsValid()
     {
-        $controller = new MemberController();
         $data = array('number' => '12345 ', 'birthdate' => '17-05-1993');
-        $result = $controller->validateMember($data);
+        $result = $this->memberService->validateMember($data);
 
         $this->assertEmpty($result);
     }
 
     public function testIfMemberHasNoNumber()
     {
-        $controller = new MemberController();
         $data = array('number' => ' ', 'birthdate' => '17-05-1993');
-        $result = $controller->validateMember($data);
+        $result = $this->memberService->validateMember($data);
 
         $this->assertNotEmpty($result);
         $this->assertEquals($result[0]['message'], 'Gelieve jouw lidnummer in te vullen');
@@ -44,9 +53,8 @@ class MemberControllerTest extends TestCase
 
     public function testIfMemberHasNoValidNumber()
     {
-        $controller = new MemberController();
         $data = array('number' => 'string', 'birthdate' => '17-05-1993');
-        $result = $controller->validateMember($data);
+        $result = $this->memberService->validateMember($data);
 
         $this->assertNotEmpty($result);
         $this->assertEquals($result[0]['message'], 'Het lidnummer mag enkel nummers bevatten');
@@ -54,9 +62,8 @@ class MemberControllerTest extends TestCase
 
     public function testIfMemberHasNoDate()
     {
-        $controller = new MemberController();
         $data = array('number' => 12345, 'birthdate' => ' ');
-        $result = $controller->validateMember($data);
+        $result = $this->memberService->validateMember($data);
 
         $this->assertNotEmpty($result);
         $this->assertEquals($result[0]['message'], 'Gelieve jouw geboortedatum in te vullen');
@@ -64,9 +71,8 @@ class MemberControllerTest extends TestCase
 
     public function testIfMemberHasNoValidDate()
     {
-        $controller = new MemberController();
         $data = array('number' => '12345', 'birthdate' => 'test');
-        $result = $controller->validateMember($data);
+        $result = $this->memberService->validateMember($data);
 
         $this->assertNotEmpty($result);
         $this->assertEquals($result[0]['message'], 'Gelieve een geldig geboortedatum in te vullen');

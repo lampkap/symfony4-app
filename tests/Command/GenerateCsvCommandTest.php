@@ -3,12 +3,22 @@
 namespace App\Tests\Command;
 
 use App\Command\GenerateCsvCommand;
-use App\Controller\MemberController;
-use PHPUnit\Framework\TestCase;
+use App\Service\HelperService;
 use ReflectionClass;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class GenerateCsvCommandTest extends TestCase
+class GenerateCsvCommandTest extends KernelTestCase
 {
+    private $helperService;
+
+    protected function setUp()
+    {
+        self::bootKernel();
+        $container = self::$kernel->getContainer();
+
+        $this->helperService = self::$container->get('App\Service\HelperService');
+    }
+
     protected static function getMethod($name)
     {
         $class = new ReflectionClass('App\Command\GenerateCsvCommand');
@@ -20,10 +30,7 @@ class GenerateCsvCommandTest extends TestCase
 
     public function testIfNumberIsGenerated()
     {
-        $command = new GenerateCsvCommand();
-        $method = self::getMethod('generateNumber');
-
-        $result = $method->invokeArgs($command, array());
+        $result = $this->helperService->generateNumber();
 
         $this->assertInternalType('integer', $result);
         $this->assertGreaterThanOrEqual(1000, $result);
@@ -32,19 +39,16 @@ class GenerateCsvCommandTest extends TestCase
 
     public function testIfValidDateIsGenerated()
     {
-        $command = new GenerateCsvCommand();
-        $method = self::getMethod('generateDate');
+        $result = $this->helperService->generateDate();
 
-        $result = $method->invokeArgs($command, array());
-
-        $this->assertNotFalse(MemberController::formatBirthdate($result));
+        $this->assertNotFalse($this->helperService->formatBirthdate($result));
     }
 
     public function testIfCsvFileIsCreated()
     {
-        $csv = '/Users/diem/Desktop/test.csv';
+        $csv = 'test_csv_file_created.csv';
 
-        $command = new GenerateCsvCommand();
+        $command = new GenerateCsvCommand(null, new HelperService());
         $method = self::getMethod('generateCsv');
 
         $method->invokeArgs($command, array($csv));
