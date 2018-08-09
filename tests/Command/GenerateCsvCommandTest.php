@@ -47,7 +47,7 @@ class GenerateCsvCommandTest extends TestCase
         $command = new GenerateCsvCommand();
         $method = self::getMethod('generateCsv');
 
-        $method->invokeArgs($command, array($csv, 'create'));
+        $method->invokeArgs($command, array($csv));
 
         $this->assertFileExists($csv);
 
