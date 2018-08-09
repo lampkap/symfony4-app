@@ -156,10 +156,9 @@ class ImportMembersCommand extends ContainerAwareCommand
      * @param $date
      * @return bool
      */
-    protected function updateMember($member, $date)
+    protected function updateMember(Member $member, $date)
     {
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $member = reset($member);
 
         if($member->getBirthdate() != $date) {
             $member->setBirthdate($date);
