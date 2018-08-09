@@ -2,15 +2,17 @@
 
 namespace App\Tests\Command;
 
+use App\Command\GenerateCsvCommand;
 use App\Command\ImportMembersCommand;
+use Symfony\Component\HttpKernel\Log\Logger;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
 class ImportMembersCommandTest extends TestCase
 {
-    protected static function getMethod($name)
+    protected static function getMethod($class, $name)
     {
-        $class = new ReflectionClass('App\Command\ImportMembersCommand');
+        $class = new ReflectionClass($class);
         $method = $class->getMethod($name);
         $method->setAccessible(true);
 
@@ -19,13 +21,23 @@ class ImportMembersCommandTest extends TestCase
 
     public function testIfCsvIsParsed()
     {
-        $csv = '/Users/diem/Desktop/members_2.csv';
-        $command = new ImportMembersCommand();
-        $method = self::getMethod('parseCsv');
+        $csv = 'test_csv_parser.csv';
+
+        $generateCommand = new GenerateCsvCommand();
+        $method = self::getMethod('App\Command\GenerateCsvCommand', 'generateCsv');
+
+        $method->invokeArgs($generateCommand, array($csv));
+
+        $this->assertFileExists($csv);
+
+        $command = new ImportMembersCommand(null, new Logger());
+        $method = self::getMethod('App\Command\ImportMembersCommand', 'parseCsv');
 
         $result = $method->invokeArgs($command, array($csv));
 
         $this->assertInternalType('array', $result);
         $this->assertNotEmpty($result);
+
+        unlink($csv);
     }
 }
