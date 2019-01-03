@@ -17,6 +17,9 @@
 - Migrate database tables
     
     `php bin/console doctrine:migrations:migrate`
+- Create a "test.csv" file with dummy member data
+
+    `php bin/console generate:csv test.csv`
 - Import members from a csv file
 
     `php bin/console import:members /path/to/csv/file`   
