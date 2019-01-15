@@ -50,23 +50,21 @@ class ImportMembersCommand extends ContainerAwareCommand
         $io = new SymfonyStyle($input, $output);
         $file = $input->getArgument('file');
 
-        if ($file) {
-
-            if(file_exists($file)) {
-                $info = pathinfo($file);
-
-                if($info['extension'] === 'csv') {
-
-                    $this->importMembers($file, $io);
-                } else {
-                    $io->error('Het bestand moet van het type CSV zijn');
-                }
-            } else {
-                $io->error(sprintf('Er werd geen bestand %s gevonden', $file));
-            }
-        } else {
+        if(!$file) {
             $io->error('Geef een bestandspad mee als argument');
         }
+
+        if(!file_exists($file)) {
+            $io->error(sprintf('Er werd geen bestand %s gevonden', $file));
+        }
+
+        $info = pathinfo($file);
+
+        if($info['extension'] !== 'csv') {
+            $io->error('Het bestand moet van het type CSV zijn');
+        }
+
+        $this->importMembers($file, $io);
     }
 
     /**
@@ -92,30 +90,30 @@ class ImportMembersCommand extends ContainerAwareCommand
             if(!$date) {
                 $io->error('De datum ' . $memberValues[0] . ' is niet correct. Het importeren is onderbroken');
                 exit;
+            }
+
+            $em = $this->getContainer()->get('doctrine')->getManager();
+
+            $member = $em->getRepository(Member::class)->findOneBy(array('number' => $memberValues[1]));
+
+            if(empty($member)) {
+
+                $this->memberService->createMember($date, $memberValues[1]);
+                $this->logger->info('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geïmporteerd');
+                $created++;
+
             } else {
-                $em = $this->getContainer()->get('doctrine')->getManager();
+                // check if the member should be updated. If so, the member will be updated and function will return true
+                $hasUpdated = $this->memberService->updateMember($member, $date);
 
-                $member = $em->getRepository(Member::class)->findOneBy(array('number' => $memberValues[1]));
-
-                if(empty($member)) {
-
-                    $this->memberService->createMember($date, $memberValues[1]);
-                    $this->logger->info('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geïmporteerd');
-                    $created++;
-
+                if($hasUpdated) {
+                    $this->logger->info('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geüpdate');
+                    $updated++;
                 } else {
-                    // check if the member should be updated. If so, the member will be updated and function will return true
-                    $hasUpdated = $this->memberService->updateMember($member, $date);
-
-                    if($hasUpdated) {
-                        $this->logger->info('Lid ' . $memberValues[1] . ', geboren op ' . $date->format('d-m-Y') . ' geüpdate');
-                        $updated++;
-                    } else {
-                        $this->logger->info('Lid ' . $memberValues[1] . ' is niet gewijzigd.');
-                        $skipped++;
-                    }
-
+                    $this->logger->info('Lid ' . $memberValues[1] . ' is niet gewijzigd.');
+                    $skipped++;
                 }
+
             }
         }
 

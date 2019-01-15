@@ -73,17 +73,16 @@ class MemberService
      */
     public function updateMember(Member $member, $date)
     {
-        if($member->getBirthdate() != $date) {
-            $member->setBirthdate($date);
-
-            $this->em->persist($member);
-            $this->em->flush();
-
-            return true;
-
-        } else {
+        if($member->getBirthdate() == $date) {
             return false;
         }
+
+        $member->setBirthdate($date);
+
+        $this->em->persist($member);
+        $this->em->flush();
+
+        return true;
     }
 
     public function addGiftToMember(Member $member, Gift $gift)

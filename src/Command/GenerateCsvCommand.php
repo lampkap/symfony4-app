@@ -34,40 +34,38 @@ class GenerateCsvCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $file = $input->getArgument('path');
 
-        if ($file) {
-            $info = pathinfo($file);
+        if(!$file) {
+            $io->error('Geef een bestandspad mee als argument');
+        }
 
-            if($info['extension'] === 'csv') {
+        $info = pathinfo($file);
 
-                if(file_exists($file)) {
-                    $handleFile = $io->choice(
-                        'Het bestand ' . $file . ' bestaat al. Wilt u deze opnieuw laten genereren of het bestand uitbreiden?',
-                        array('Opnieuw laten genereren', 'bijvoegen'));
+        if($info['extension'] !== 'csv') {
+            $io->error('Het bestand moet van het type CSV zijn');
+        }
 
-                    if($handleFile === 'Opnieuw laten genereren') {
-                        unlink($file);
-                    }
-                } else {
-                    $handleFile = 'create';
-                }
+        if(file_exists($file)) {
+            $handleFile = $io->choice(
+                'Het bestand ' . $file . ' bestaat al. Wilt u deze opnieuw laten genereren of het bestand uitbreiden?',
+                array('Opnieuw laten genereren', 'bijvoegen'));
 
-                $this->generateCsv($file);
-
-                if(file_exists($file)) {
-                    if($handleFile === 'create' || $handleFile === 'Opnieuw laten genereren') {
-                        $io->success('Er werden 1000 leden gegenereerd en toegevoegd aan het bestand ' . $file);
-                    } else {
-                        $io->success('Er werden 1000 extra leden gegenereerd en toegevoegd aan het bestand ' . $file);
-                    }
-                } else {
-                    $io->error('Het bestand ' . $file . ' kon niet worden aangemaakt');
-                }
-
-            } else {
-                $io->error('Het bestand moet van het type CSV zijn');
+            if($handleFile === 'Opnieuw laten genereren') {
+                unlink($file);
             }
         } else {
-            $io->error('Geef een bestandspad mee als argument');
+            $handleFile = 'create';
+        }
+
+        $this->generateCsv($file);
+
+        if(!file_exists($file)) {
+            $io->error('Het bestand ' . $file . ' kon niet worden aangemaakt');
+        }
+
+        if($handleFile === 'create' || $handleFile === 'Opnieuw laten genereren') {
+            $io->success('Er werden 1000 leden gegenereerd en toegevoegd aan het bestand ' . $file);
+        } else {
+            $io->success('Er werden 1000 extra leden gegenereerd en toegevoegd aan het bestand ' . $file);
         }
     }
 

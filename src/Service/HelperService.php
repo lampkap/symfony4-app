@@ -38,8 +38,8 @@ class HelperService
     public function parseCsv($file)
     {
         $data = array();
-        if (($handle = fopen($file, 'r')) !== FALSE) {
-            while (($row = fgetcsv($handle, 0, ';')) !== FALSE) {
+        if (($handle = fopen($file, 'r')) !== false) {
+            while (($row = fgetcsv($handle, 0, ';')) !== false) {
                 $data[] = $row;
             }
             fclose($handle);
