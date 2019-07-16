@@ -3,7 +3,7 @@
  */
 let inputs = document.querySelectorAll('.form--input');
 
-if(inputs) {
+if (inputs) {
 
     inputs.forEach(input => {
 
@@ -12,25 +12,28 @@ if(inputs) {
         input.addEventListener('change', () => {
 
             stickyLabel(input);
-    
+
         })
     })
 
 }
 
 function stickyLabel(input) {
-    if (input.value === '')
+    if (input.value === '') 
         input.nextElementSibling.classList.remove("sticky");
-    else
-        input.nextElementSibling.classList.add("sticky");
-}
+    else 
+        input
+            .nextElementSibling
+            .classList
+            .add("sticky");
+    }
 
 /**
  * Initialize datepicker
  */
 let dateField = document.querySelector('.form--input__date');
 
-if(dateField) {
+if (dateField) {
 
     // disable custom input in field
     dateField.addEventListener('keypress', e => {
@@ -41,16 +44,47 @@ if(dateField) {
         e.preventDefault();
     })
 
-    let picker = new Pikaday({ 
+    let picker = new Pikaday({
         field: dateField,
         format: 'DD-MM-YYYY',
-        yearRange: [1900, moment().year()],
+        yearRange: [
+            1900, moment().year()
+        ],
         i18n: {
-            previousMonth : 'Vorige maand',
-            nextMonth     : 'Volgende maand',
-            months        : ['januari','februari','maart','april','mei','juni','juli','augustus','september','october','november','december'],
-            weekdays      : ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'],
-            weekdaysShort : ['zon','maa','din','woe','don','vri','zat']
+            previousMonth: 'Vorige maand',
+            nextMonth: 'Volgende maand',
+            months: [
+                'januari',
+                'februari',
+                'maart',
+                'april',
+                'mei',
+                'juni',
+                'juli',
+                'augustus',
+                'september',
+                'october',
+                'november',
+                'december'
+            ],
+            weekdays: [
+                'zondag',
+                'maandag',
+                'dinsdag',
+                'woensdag',
+                'donderdag',
+                'vrijdag',
+                'zaterdag'
+            ],
+            weekdaysShort: [
+                'zon',
+                'maa',
+                'din',
+                'woe',
+                'don',
+                'vri',
+                'zat'
+            ]
         }
     });
 
@@ -62,7 +96,7 @@ if(dateField) {
 let gifts = document.querySelectorAll('.gift'),
     formField = document.getElementById('gift_gift');
 
-if(gifts) {
+if (gifts) {
 
     gifts.forEach(gift => {
 
@@ -70,7 +104,9 @@ if(gifts) {
             // remove all active classes
             removeActiveClassOn(gifts);
             // add active class
-            gift.classList.add('active');
+            gift
+                .classList
+                .add('active');
             // set data-id as form value
             formField.value = gift.getAttribute('data-id');
         })
@@ -80,7 +116,9 @@ if(gifts) {
 }
 
 function removeActiveClassOn(elements) {
-    elements.forEach(element => {
-        element.classList.remove('active');
+    elements.forEach(element => {
+        element
+            .classList
+            .remove('active');
     })
 }
